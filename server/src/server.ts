@@ -2,6 +2,11 @@ import * as express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
 
+// import { usersToBroadcast } from './users.json';
+// build error (need to manually copy json file while build into server/dist/server)
+// so this workaround is present:
+const usersToBroadcast = [1, 3];
+
 const app = express();
 
 //initialize a simple http server
@@ -12,6 +17,7 @@ const wss = new WebSocket.Server({ server });
 
 interface ExtWebSocket extends WebSocket {
     isAlive: boolean;
+    id: number;
 }
 
 function createMessage(content: string, isBroadcast = false, sender = 'NS'): string {
@@ -26,11 +32,13 @@ export class Message {
     ) { }
 }
 
+let lastUserId = 1;
 wss.on('connection', (ws: WebSocket) => {
 
     const extWs = ws as ExtWebSocket;
 
     extWs.isAlive = true;
+    extWs.id = lastUserId++;
 
     ws.on('pong', () => {
         extWs.isAlive = true;
@@ -47,7 +55,8 @@ wss.on('connection', (ws: WebSocket) => {
                 //send back the message to the other clients
                 wss.clients
                     .forEach(client => {
-                        if (client != ws) {
+                        const isUserUnderBroadcast = usersToBroadcast.includes(client.id);
+                        if (client != ws && isUserUnderBroadcast) {
                             client.send(createMessage(message.content, true, message.sender));
                         }
                     });
