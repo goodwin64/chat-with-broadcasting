@@ -11,7 +11,6 @@
     "s": "npm run serve",
     "serve": "concurrently \"npm run build.w\" \"nodemon --watch ./dist/server ./dist/server/server.js\"",
     "lint": "tslint \"src/**/*.ts\"",
-    "prebuild": "npm install",
     "b": "npm run build.w",
     "build": "npm run copy-deps && tsc",
     "build.w": "npm run copy-deps && tsc -w"

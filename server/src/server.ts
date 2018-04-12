@@ -2,10 +2,7 @@ import * as express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
 
-// import { usersToBroadcast } from './users.json';
-// build error (need to manually copy json file while build into server/dist/server)
-// so this workaround is present:
-const usersToBroadcast = [1, 3];
+const { usersToBroadcast } = require('./users.json');
 
 const app = express();
 
@@ -55,7 +52,8 @@ wss.on('connection', (ws: WebSocket) => {
                 //send back the message to the other clients
                 wss.clients
                     .forEach(client => {
-                        const isUserUnderBroadcast = usersToBroadcast.includes(client.id);
+                        const extClient = client as ExtWebSocket;
+                        const isUserUnderBroadcast = usersToBroadcast.includes(extClient.id);
                         if (client != ws && isUserUnderBroadcast) {
                             client.send(createMessage(message.content, true, message.sender));
                         }
